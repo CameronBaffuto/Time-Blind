@@ -1,6 +1,6 @@
 🕒 Time Blind (WIP)
 
-![Swift](https://img.shields.io/badge/swift-5.9-orange)
+![Swift](https://img.shields.io/badge/swift-6.0-orange)
 ![Platform](https://img.shields.io/badge/platform-iOS%20%26%20iPadOS-blue)
 ![Status](https://img.shields.io/badge/status-WIP-yellow)
 ![Build](https://img.shields.io/badge/build-local_only-lightgrey)
