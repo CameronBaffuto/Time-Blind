@@ -1,4 +1,4 @@
-🕒 Time Blind (WIP)
+🕒 Time Blind
 
 ![Swift](https://img.shields.io/badge/swift-6.0-orange)
 ![Platform](https://img.shields.io/badge/platform-iOS%20%26%20iPadOS-blue)
