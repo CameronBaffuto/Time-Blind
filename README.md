@@ -5,7 +5,7 @@
 ![Status](https://img.shields.io/badge/status-WIP-yellow)
 ![Build](https://img.shields.io/badge/build-local_only-lightgrey)
 
-**Time Blind** is a simple, SwiftUI-based iOS app designed to help people who chronically run late — by showing how early or late they’d arrive at a saved destination **if they left right now**.
+**Time Blind** is a simple, SwiftUI-based iOS app designed to help people who chronically run late, by showing how early or late they’d arrive at a saved destination **if they left right now**.
 
 ---
 
