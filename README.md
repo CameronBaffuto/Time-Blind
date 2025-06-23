@@ -11,7 +11,7 @@
 
 ## ✨ Core Functionality
 
-- ✅ Add destinations with a name, address, and target arrival time  
+- ✅ Add destinations with a name, address, and optional target arrival time  
 - ✅ Automatically geocode addresses to coordinates (via `CLGeocoder`)  
 - ✅ Calculate real-time ETA using `MapKit` and live traffic  
 - ✅ Compare ETA to the user-defined arrival time (e.g., “+4 min” or “–3 min”)  
