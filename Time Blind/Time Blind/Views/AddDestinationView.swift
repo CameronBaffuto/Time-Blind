@@ -10,6 +10,9 @@ import SwiftData
 import CoreLocation
 
 struct AddDestinationView: View {
+    @Query(sort: \DestinationGroup.name) var groups: [DestinationGroup]
+    @State private var selectedGroup: DestinationGroup?
+    
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
@@ -25,6 +28,16 @@ struct AddDestinationView: View {
                 Section(header: Text("Details")) {
                     TextField("Name", text: $name)
                     TextField("Address", text: $address)
+                    Picker("Group", selection: $selectedGroup) {
+                        ForEach(groups) { group in
+                            Text(group.name).tag(group as DestinationGroup?)
+                        }
+                    }
+                    .onAppear {
+                        if selectedGroup == nil {
+                            selectedGroup = groups.first(where: { $0.name == "Uncategorized" }) ?? groups.first
+                        }
+                    }
                     DatePicker(
                         "Target Arrival Time (optional)",
                         selection: Binding(
@@ -75,7 +88,8 @@ struct AddDestinationView: View {
                     address: address,
                     latitude: coord.latitude,
                     longitude: coord.longitude,
-                    targetArrivalTime: targetArrivalTime
+                    targetArrivalTime: targetArrivalTime,
+                    group: selectedGroup
                 )
                 modelContext.insert(newDest)
                 dismiss()

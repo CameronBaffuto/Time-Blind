@@ -9,6 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct EditDestinationView: View {
+    @Query(sort: \DestinationGroup.name) var groups: [DestinationGroup]
+    @State private var selectedGroup: DestinationGroup?
+    
     @Environment(\.dismiss) private var dismiss
     @Bindable var destination: Destination
 
@@ -35,6 +38,16 @@ struct EditDestinationView: View {
                         .onChange(of: address) { oldValue, newValue in
                             addressChanged = (newValue != destination.address)
                         }
+                    Picker("Group", selection: $selectedGroup) {
+                        ForEach(groups) { group in
+                            Text(group.name).tag(group as DestinationGroup?)
+                        }
+                    }
+                    .onAppear {
+                        if selectedGroup == nil {
+                            selectedGroup = groups.first(where: { $0.name == "Uncategorized" }) ?? groups.first
+                        }
+                    }
                     DatePicker(
                         "Target Arrival Time (optional)",
                         selection: Binding(
@@ -82,8 +95,8 @@ struct EditDestinationView: View {
                 destination.name = name
                 destination.address = address
                 destination.targetArrivalTime = targetArrivalTime
+                destination.group = selectedGroup
 
-                // If address changed, geocode
                 if addressChanged {
                     let coord = try await GeocodingService.shared.geocode(address: address)
                     destination.latitude = coord.latitude

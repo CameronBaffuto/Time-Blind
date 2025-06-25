@@ -10,6 +10,17 @@ import SwiftData
 
 struct DestinationListView: View {
     @Query var destinations: [Destination]
+    
+    var group: DestinationGroup
+    
+    init(group: DestinationGroup) {
+        self.group = group
+        let groupID = group.id
+        _destinations = Query(filter: #Predicate { destination in
+            destination.group?.id == groupID
+        })
+    }
+    
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = DestinationListViewModel()
     @State private var showingAdd = false
@@ -92,7 +103,7 @@ struct DestinationListView: View {
                     }
                 }
             }
-            .navigationTitle("Time Blind")
+            .navigationTitle(group.name) 
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
@@ -164,7 +175,7 @@ struct DestinationListView: View {
 }
 
 
-#Preview {
-    DestinationListView()
-        .modelContainer(for: Destination.self)
-}
+//#Preview {
+//    DestinationListView(group: <#DestinationGroup#>)
+//        .modelContainer(for: Destination.self)
+//}
