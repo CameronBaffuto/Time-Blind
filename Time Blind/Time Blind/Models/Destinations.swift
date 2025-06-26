@@ -24,7 +24,7 @@ class Destination {
         latitude: Double? = nil,
         longitude: Double? = nil,
         targetArrivalTime: Date? = nil,
-        group: DestinationGroup? = nil
+        group: DestinationGroup? = nil,
     ) {
         self.name = name
         self.address = address
