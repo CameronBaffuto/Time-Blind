@@ -152,9 +152,32 @@ struct DestinationListView: View {
     }
 
     private func diffText(_ minutes: Int) -> String {
-        if minutes == 0 { return "On Time" }
-        return minutes < 0 ? "\(-minutes) min early" : "\(minutes) min late"
+        if minutes == 0 {
+            return "On Time"
+        }
+
+        let absMinutes = abs(minutes)
+        let hours = absMinutes / 60
+        let remainingMinutes = absMinutes % 60
+
+        var timeString = ""
+        if hours > 0 {
+            timeString += "\(hours) hr"
+            if hours > 1 { timeString += "s" }
+        }
+
+        if remainingMinutes > 0 {
+            if !timeString.isEmpty { timeString += " " }
+            timeString += "\(remainingMinutes) min"
+        }
+
+        if minutes < 0 {
+            return "\(timeString) early"
+        } else {
+            return "\(timeString) late"
+        }
     }
+
 
     @ViewBuilder
     private func iconForDiff(_ minutes: Int) -> some View {

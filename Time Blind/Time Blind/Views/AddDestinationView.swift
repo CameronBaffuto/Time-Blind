@@ -9,11 +9,6 @@ import SwiftUI
 import SwiftData
 import MapKit
 
-struct MapPin: Identifiable {
-    let id = UUID()
-    let coordinate: CLLocationCoordinate2D
-}
-
 struct AddDestinationView: View {
     @Query(sort: \DestinationGroup.name) var groups: [DestinationGroup]
     @State private var selectedGroup: DestinationGroup?
@@ -27,6 +22,7 @@ struct AddDestinationView: View {
     @State private var errorMessage: String?
 
     @StateObject private var addressVM = AddressAutocompleteViewModel()
+    @State private var showAddressSearch = false
 
     var body: some View {
         NavigationView {
@@ -34,58 +30,19 @@ struct AddDestinationView: View {
                 Section(header: Text("Details")) {
                     TextField("Name", text: $name)
 
-                    VStack(alignment: .leading) {
-                        TextField("Address", text: $addressVM.addressField)
-                            .onChange(of: addressVM.addressField) { _, newValue in
-                                addressVM.updateQuery(newValue)
-                            }
-                        if addressVM.showSuggestions && !addressVM.suggestions.isEmpty {
-                            ScrollView {
-                                VStack(spacing: 0) {
-                                    ForEach(addressVM.suggestions, id: \.self) { suggestion in
-                                        Button(action: {
-                                            addressVM.selectSuggestion(suggestion)
-                                        }) {
-                                            VStack(alignment: .leading, spacing: 2) {
-                                                Text(suggestion.title)
-                                                    .fontWeight(.semibold)
-                                                    .foregroundColor(.primary)
-                                                if !suggestion.subtitle.isEmpty {
-                                                    Text(suggestion.subtitle)
-                                                        .font(.caption)
-                                                        .foregroundColor(.secondary)
-                                                }
-                                            }
-                                            .padding(.vertical, 10)
-                                            .padding(.horizontal)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .background(Color(.systemBackground))
-                                        }
-                                        .buttonStyle(PlainButtonStyle())
-                                        .contentShape(Rectangle())
-                                        Divider()
-                                    }
-                                }
-                                .background(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color(.systemGray6))
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color(.separator), lineWidth: 0.5)
-                                )
-                            }
-                            .frame(maxHeight: 200)
-                            .padding(.vertical, 4)
-                            .padding(.horizontal, -16)
+                    Button {
+                        showAddressSearch = true
+                    } label: {
+                        HStack {
+                            Text(addressVM.addressField.isEmpty ? "Tap to search address" : addressVM.addressField)
+                                .foregroundColor(addressVM.addressField.isEmpty ? .gray : .primary)
+                            Spacer()
+                            Image(systemName: "magnifyingglass")
                         }
                     }
-                    .padding(.vertical, 2)
 
                     if let region = addressVM.mapRegion {
-                        Map(
-                            position: .constant(.region(region))
-                        ) {
+                        Map(position: .constant(.region(region))) {
                             if let coordinate = addressVM.selectedCoordinate ?? addressVM.mapRegion?.center {
                                 Marker("Destination", coordinate: coordinate)
                             }
@@ -121,6 +78,7 @@ struct AddDestinationView: View {
                         set: { newValue in targetArrivalTime = newValue ? Date() : nil }
                     ))
                 }
+
                 if let errorMessage = errorMessage {
                     Section {
                         Text(errorMessage)
@@ -141,6 +99,9 @@ struct AddDestinationView: View {
                             .disabled(name.isEmpty || addressVM.addressField.isEmpty)
                     }
                 }
+            }
+            .sheet(isPresented: $showAddressSearch) {
+                AddressSearchView(viewModel: addressVM)
             }
         }
     }

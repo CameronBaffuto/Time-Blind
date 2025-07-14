@@ -20,7 +20,7 @@ class AddressAutocompleteViewModel: NSObject, ObservableObject, MKLocalSearchCom
 
     override init() {
         super.init()
-        completer.resultTypes = .address
+        completer.resultTypes = [.address, .pointOfInterest]
         completer.delegate = self
     }
 
@@ -29,6 +29,13 @@ class AddressAutocompleteViewModel: NSObject, ObservableObject, MKLocalSearchCom
         completer.queryFragment = text
     }
 
+    func setSearchRegion(using location: CLLocation) {
+        let region = MKCoordinateRegion(
+            center: location.coordinate,
+            span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
+        )
+        completer.region = region
+    }
 
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         Task { @MainActor in
