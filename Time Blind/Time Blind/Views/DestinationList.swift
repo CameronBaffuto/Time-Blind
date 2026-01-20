@@ -133,11 +133,13 @@ struct DestinationListView: View {
             .refreshable {
                 normalizeTargetArrivalTimes()
                 await viewModel.refreshETAs(for: destinations, context: modelContext)
+                LiveActivityManager.shared.syncNow(modelContainer: modelContext.container)
             }
             .onAppear {
                 Task { await viewModel.refreshETAs(for: destinations, context: modelContext) }
                 normalizeTargetArrivalTimes()
                 ensureDestinationOrderInitialized()
+                LiveActivityManager.shared.syncNow(modelContainer: modelContext.container)
             }
             .onChange(of: destinations) { oldValue, newValue in
                 Task { await viewModel.refreshETAs(for: newValue, context: modelContext) }
@@ -161,7 +163,10 @@ struct DestinationListView: View {
            !Calendar.current.isDateInToday(target) {
             destination.targetArrivalTime = nil
         }
-        Task { await viewModel.refreshETA(for: destination, context: modelContext) }
+        Task {
+            await viewModel.refreshETA(for: destination, context: modelContext)
+            LiveActivityManager.shared.syncNow(modelContainer: modelContext.container)
+        }
     }
 
     private func normalizeTargetArrivalTimes() {

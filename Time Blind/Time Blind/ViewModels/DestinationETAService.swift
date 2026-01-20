@@ -31,8 +31,9 @@ final class DestinationETAService: NSObject, ObservableObject {
         let userLocation = try await getCurrentLocation()
 
         let request = MKDirections.Request()
-        request.source = MKMapItem(placemark: MKPlacemark(coordinate: userLocation.coordinate))
-        request.destination = MKMapItem(placemark: MKPlacemark(coordinate: destination))
+        request.source = MKMapItem(location: userLocation, address: nil)
+        let destinationLocation = CLLocation(latitude: destination.latitude, longitude: destination.longitude)
+        request.destination = MKMapItem(location: destinationLocation, address: nil)
         request.transportType = .automobile
         request.requestsAlternateRoutes = false
         request.departureDate = Date()
@@ -77,4 +78,3 @@ extension DestinationETAService: CLLocationManagerDelegate {
         }
     }
 }
-

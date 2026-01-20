@@ -7,26 +7,23 @@
 
 import Foundation
 import CoreLocation
+import MapKit
 
 @MainActor
 final class GeocodingService {
     static let shared = GeocodingService()
-    private let geocoder = CLGeocoder()
 
     private init() {}
 
     func geocode(address: String) async throws -> CLLocationCoordinate2D {
-        return try await withCheckedThrowingContinuation { continuation in
-            geocoder.geocodeAddressString(address) { placemarks, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else if let location = placemarks?.first?.location {
-                    continuation.resume(returning: location.coordinate)
-                } else {
-                    continuation.resume(throwing: GeocodingError.noResult)
-                }
-            }
+        guard let request = MKGeocodingRequest(addressString: address) else {
+            throw GeocodingError.noResult
         }
+        let items = try await request.mapItems
+        if let location = items.first?.location {
+            return location.coordinate
+        }
+        throw GeocodingError.noResult
     }
 
     enum GeocodingError: Error, LocalizedError {
@@ -39,4 +36,3 @@ final class GeocodingService {
         }
     }
 }
-

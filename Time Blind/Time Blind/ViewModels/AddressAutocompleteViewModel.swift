@@ -65,7 +65,8 @@ class AddressAutocompleteViewModel: NSObject, ObservableObject, MKLocalSearchCom
         let search = MKLocalSearch(request: searchRequest)
         Task {
             let response = try? await search.start()
-            if let item = response?.mapItems.first, let coordinate = item.placemark.coordinate as CLLocationCoordinate2D? {
+            if let item = response?.mapItems.first {
+                let coordinate = item.location.coordinate
                 await MainActor.run {
                     self.selectedCoordinate = coordinate
                     self.mapRegion = MKCoordinateRegion(center: coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
@@ -74,4 +75,3 @@ class AddressAutocompleteViewModel: NSObject, ObservableObject, MKLocalSearchCom
         }
     }
 }
-

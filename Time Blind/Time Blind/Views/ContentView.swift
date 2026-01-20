@@ -9,8 +9,13 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
         DestinationGroupListView()
+            .onAppear {
+                LiveActivityManager.shared.startMonitoring(modelContainer: modelContext.container)
+            }
     }
 }
 

@@ -6,9 +6,44 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E5A1B20B2E0A000100000001 /* TimeBlindWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E5A1B2012E0A000100000001 /* TimeBlindWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E5A1B2102E0A000100000001 /* TimeBlindWidgets/TimeBlindWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A1B20D2E0A000100000001 /* TimeBlindWidgets/TimeBlindWidgets.swift */; };
+		E5A1B2112E0A000100000001 /* TimeBlindShared/TimeBlindTripAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A1B20F2E0A000100000001 /* TimeBlindShared/TimeBlindTripAttributes.swift */; };
+		E5A1B2122E0A000100000001 /* TimeBlindWidgets/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5A1B20E2E0A000100000001 /* TimeBlindWidgets/Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E5A1B2062E0A000100000001 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E5A1B20B2E0A000100000001 /* TimeBlindWidgets.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		E59285662E08EC300094E64E /* Time Blind.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Time Blind.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E5A1B2012E0A000100000001 /* TimeBlindWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TimeBlindWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E5A1B20D2E0A000100000001 /* TimeBlindWidgets/TimeBlindWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeBlindWidgets/TimeBlindWidgets.swift; sourceTree = SOURCE_ROOT; };
+		E5A1B20E2E0A000100000001 /* TimeBlindWidgets/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = TimeBlindWidgets/Assets.xcassets; sourceTree = SOURCE_ROOT; };
+		E5A1B20F2E0A000100000001 /* TimeBlindShared/TimeBlindTripAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeBlindShared/TimeBlindTripAttributes.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E5D921952F200AF7007A0582 /* Exceptions for "TimeBlindWidgets" folder in "TimeBlindWidgets" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+			);
+			target = E5A1B2072E0A000100000001 /* TimeBlindWidgets */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E59285682E08EC300094E64E /* Time Blind */ = {
@@ -16,10 +51,30 @@
 			path = "Time Blind";
 			sourceTree = "<group>";
 		};
+		E5A1B2022E0A000100000001 /* TimeBlindWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E5D921952F200AF7007A0582 /* Exceptions for "TimeBlindWidgets" folder in "TimeBlindWidgets" target */,
+			);
+			path = TimeBlindWidgets;
+			sourceTree = "<group>";
+		};
+		E5A1B20C2E0A000100000001 /* TimeBlindShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = TimeBlindShared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E59285632E08EC300094E64E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E5A1B2152E0A000100000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,7 +88,10 @@
 			isa = PBXGroup;
 			children = (
 				E59285682E08EC300094E64E /* Time Blind */,
+				E5A1B2022E0A000100000001 /* TimeBlindWidgets */,
+				E5A1B20C2E0A000100000001 /* TimeBlindShared */,
 				E59285672E08EC300094E64E /* Products */,
+				E5D9216A2F1FE788007A0582 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -41,8 +99,19 @@
 			isa = PBXGroup;
 			children = (
 				E59285662E08EC300094E64E /* Time Blind.app */,
+				E5A1B2012E0A000100000001 /* TimeBlindWidgets.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		E5D9216A2F1FE788007A0582 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				E5A1B20D2E0A000100000001 /* TimeBlindWidgets/TimeBlindWidgets.swift */,
+				E5A1B20F2E0A000100000001 /* TimeBlindShared/TimeBlindTripAttributes.swift */,
+				E5A1B20E2E0A000100000001 /* TimeBlindWidgets/Assets.xcassets */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -55,6 +124,7 @@
 				E59285622E08EC300094E64E /* Sources */,
 				E59285632E08EC300094E64E /* Frameworks */,
 				E59285642E08EC300094E64E /* Resources */,
+				E5A1B2062E0A000100000001 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
@@ -62,6 +132,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				E59285682E08EC300094E64E /* Time Blind */,
+				E5A1B20C2E0A000100000001 /* TimeBlindShared */,
 			);
 			name = "Time Blind";
 			packageProductDependencies = (
@@ -69,6 +140,25 @@
 			productName = "Time Blind";
 			productReference = E59285662E08EC300094E64E /* Time Blind.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E5A1B2072E0A000100000001 /* TimeBlindWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E5A1B20A2E0A000100000001 /* Build configuration list for PBXNativeTarget "TimeBlindWidgets" */;
+			buildPhases = (
+				E5A1B2132E0A000100000001 /* Sources */,
+				E5A1B2152E0A000100000001 /* Frameworks */,
+				E5A1B2142E0A000100000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TimeBlindWidgets;
+			packageProductDependencies = (
+			);
+			productName = TimeBlindWidgets;
+			productReference = E5A1B2012E0A000100000001 /* TimeBlindWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -78,9 +168,12 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1640;
-				LastUpgradeCheck = 1640;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					E59285652E08EC300094E64E = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					E5A1B2072E0A000100000001 = {
 						CreatedOnToolsVersion = 16.4;
 					};
 				};
@@ -100,6 +193,7 @@
 			projectRoot = "";
 			targets = (
 				E59285652E08EC300094E64E /* Time Blind */,
+				E5A1B2072E0A000100000001 /* TimeBlindWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -112,6 +206,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E5A1B2142E0A000100000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E5A1B2122E0A000100000001 /* TimeBlindWidgets/Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -119,6 +221,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E5A1B2132E0A000100000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E5A1B2102E0A000100000001 /* TimeBlindWidgets/TimeBlindWidgets.swift in Sources */,
+				E5A1B2112E0A000100000001 /* TimeBlindShared/TimeBlindTripAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,12 +289,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -236,11 +348,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -262,6 +375,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -291,6 +405,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -299,6 +414,42 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cambaffuto.Time-Blind";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		E5A1B2082E0A000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2934Q3ECE9;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TimeBlindWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cambaffuto.Time-Blind.TimeBlindWidgets";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E5A1B2092E0A000100000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2934Q3ECE9;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TimeBlindWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.cambaffuto.Time-Blind.TimeBlindWidgets";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -321,6 +472,15 @@
 			buildConfigurations = (
 				E59285722E08EC320094E64E /* Debug */,
 				E59285732E08EC320094E64E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E5A1B20A2E0A000100000001 /* Build configuration list for PBXNativeTarget "TimeBlindWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E5A1B2082E0A000100000001 /* Debug */,
+				E5A1B2092E0A000100000001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
