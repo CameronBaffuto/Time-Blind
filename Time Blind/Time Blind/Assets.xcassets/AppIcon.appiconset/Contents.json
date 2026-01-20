@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "5EC72AC5-684E-43A0-8253-6A3D6BF2ABD1-2 1.png",
+      "filename" : "mouseLogo.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "5EC72AC5-684E-43A0-8253-6A3D6BF2ABD1-2.png",
+      "filename" : "mouseLogoDark.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "5EC72AC5-684E-43A0-8253-6A3D6BF2ABD1-2 2.png",
+      "filename" : "mouseLogoTinted.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

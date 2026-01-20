@@ -47,6 +47,11 @@ struct DestinationGroupListView: View {
             }
             .navigationTitle("Time Blind")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Image(.logo)
+                        .resizable()
+                        .scaledToFit()
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton()
                 }

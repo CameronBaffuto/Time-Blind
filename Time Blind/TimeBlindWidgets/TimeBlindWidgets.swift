@@ -20,8 +20,8 @@ struct TimeBlindLiveActivity: Widget {
         ActivityConfiguration(for: TimeBlindTripAttributes.self) { context in
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 8) {
-                    Image(systemName: "bird.fill")
-                        .frame(width: 22, height: 22)
+                    Text("🐭")
+                        .frame(width: 32, height: 32)
                     Text(context.attributes.destinationName)
                         .font(.headline)
                         .lineLimit(1)
@@ -46,43 +46,32 @@ struct TimeBlindLiveActivity: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Image(systemName: "bird.fill")
-                        .renderingMode(.template)
-                        .foregroundStyle(.green)
+                    Text("🐭")
                 }
 
                 DynamicIslandExpandedRegion(.center) {
                     Text(context.attributes.destinationName)
-                        .font(.caption)
+                        .font(.headline)
                         .lineLimit(1)
+                        .foregroundStyle(.primary)
                 }
 
                 DynamicIslandExpandedRegion(.trailing) {
                     Text(context.state.leaveBy, style: .timer)
                         .monospacedDigit()
+                        .foregroundStyle(.primary)
                 }
 
             } compactLeading: {
-                HStack(spacing: 6) {
-                    Image(systemName: "bird.fill")
-                        .renderingMode(.template)
-                        .foregroundStyle(.green)
-
-                    Text(context.attributes.destinationName)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-
+                Text("🐭 \(context.attributes.destinationName)")
             } compactTrailing: {
                 Text(context.state.leaveBy, style: .timer)
                     .monospacedDigit()
                     .lineLimit(1)
+                    .foregroundStyle(.primary)
 
             } minimal: {
-                Image(systemName: "bird.fill")
-                    .renderingMode(.template)
-                    .foregroundStyle(.green)
+                Text("🐭")
             }
         }
     }

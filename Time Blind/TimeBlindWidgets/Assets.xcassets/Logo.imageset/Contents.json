@@ -1,17 +1,50 @@
 {
   "images" : [
     {
-      "filename" : "TimeBlindMouse.png",
+      "filename" : "TimeBlindLogo.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "TimeBlindMouse 1.png",
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "mouseLogoDark.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "TimeBlindLogo 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "TimeBlindMouse 2.png",
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "mouseLogoDark 1.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "TimeBlindLogo 2.png",
+      "idiom" : "universal",
+      "scale" : "3x"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "mouseLogoDark 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
