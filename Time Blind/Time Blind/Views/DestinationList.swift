@@ -18,13 +18,14 @@ struct DestinationListView: View {
         let groupID = group.id
         _destinations = Query(filter: #Predicate { destination in
             destination.group?.id == groupID
-        })
+        }, sort: \Destination.orderIndex)
     }
     
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = DestinationListViewModel()
     @State private var showingAdd = false
     @State private var editingDestination: Destination?
+    
 
     var body: some View {
         NavigationView {
@@ -33,6 +34,9 @@ struct DestinationListView: View {
                     let eta = viewModel.etaResults[destination.address]
                     let diff = eta != nil && destination.targetArrivalTime != nil
                         ? Int(eta!.etaDate.timeIntervalSince(destination.targetArrivalTime!) / 60)
+                        : nil
+                    let leaveBy = eta != nil && destination.targetArrivalTime != nil
+                        ? destination.targetArrivalTime!.addingTimeInterval(TimeInterval(-eta!.travelMinutes * 60))
                         : nil
 
                     VStack(alignment: .leading, spacing: 2) {
@@ -66,17 +70,16 @@ struct DestinationListView: View {
                                 .foregroundColor(.secondary)
                         }
 
-                        if let eta = eta {
-                            HStack(spacing: 8) {
-                                Text("\(eta.travelMinutes) min drive")
-                                if destination.targetArrivalTime != nil {
-                                    Text("•")
-                                    Text("Arrive at \(eta.etaDate.formatted(date: .omitted, time: .shortened))")
+                            if let eta = eta {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("\(eta.travelMinutes) min drive")
+                                    if let leaveBy = leaveBy {
+                                        Text("Leave by \(leaveBy.formatted(date: .omitted, time: .shortened))")
+                                    }
                                 }
+                                .font(.caption)
+                                .foregroundColor(.primary)
                             }
-                            .font(.caption)
-                            .foregroundColor(.primary)
-                        }
 
                         if !destination.address.isEmpty {
                             Text(destination.address)
@@ -86,6 +89,10 @@ struct DestinationListView: View {
                         }
                     }
                     .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        editingDestination = destination
+                    }
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button(role: .destructive) {
                             delete(destination)
@@ -95,34 +102,26 @@ struct DestinationListView: View {
                     }
                     .swipeActions(edge: .leading, allowsFullSwipe: false) {
                         Button {
-                            editingDestination = destination
+                            refresh(destination)
                         } label: {
-                            Label("Edit", systemImage: "square.and.pencil")
+                            Label("Refresh", systemImage: "arrow.clockwise")
                         }
-                        .tint(.blue)
+                        .tint(.green)
                     }
                 }
+                .onMove(perform: moveDestinations)
             }
             .navigationTitle(group.name) 
             .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         showingAdd = true
                     }) {
                         Image(systemName: "plus")
                     }
-                }
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        Task { await viewModel.refreshETAs(for: destinations, context: modelContext) }
-                    } label: {
-                        if viewModel.isRefreshing {
-                            ProgressView()
-                        } else {
-                            Image(systemName: "arrow.clockwise")
-                        }
-                    }
-                    .accessibilityLabel("Refresh ETA")
                 }
             }
             .sheet(isPresented: $showingAdd) {
@@ -131,8 +130,14 @@ struct DestinationListView: View {
             .sheet(item: $editingDestination) { dest in
                 EditDestinationView(destination: dest)
             }
+            .refreshable {
+                normalizeTargetArrivalTimes()
+                await viewModel.refreshETAs(for: destinations, context: modelContext)
+            }
             .onAppear {
                 Task { await viewModel.refreshETAs(for: destinations, context: modelContext) }
+                normalizeTargetArrivalTimes()
+                ensureDestinationOrderInitialized()
             }
             .onChange(of: destinations) { oldValue, newValue in
                 Task { await viewModel.refreshETAs(for: newValue, context: modelContext) }
@@ -148,6 +153,44 @@ struct DestinationListView: View {
     private func delete(_ destination: Destination) {
         if let context = destination.modelContext {
             context.delete(destination)
+        }
+    }
+
+    private func refresh(_ destination: Destination) {
+        if let target = destination.targetArrivalTime,
+           !Calendar.current.isDateInToday(target) {
+            destination.targetArrivalTime = nil
+        }
+        Task { await viewModel.refreshETA(for: destination, context: modelContext) }
+    }
+
+    private func normalizeTargetArrivalTimes() {
+        for destination in destinations {
+            if let target = destination.targetArrivalTime,
+               !Calendar.current.isDateInToday(target) {
+                destination.targetArrivalTime = nil
+            }
+        }
+    }
+
+    private func moveDestinations(from source: IndexSet, to destination: Int) {
+        var reordered = destinations
+        reordered.move(fromOffsets: source, toOffset: destination)
+        for (index, destination) in reordered.enumerated() {
+            destination.orderIndex = index
+        }
+    }
+
+    private func ensureDestinationOrderInitialized() {
+        guard !destinations.isEmpty else { return }
+        let indices = destinations.map(\.orderIndex)
+        if Set(indices).count != indices.count || destinations.allSatisfy({ $0.orderIndex == 0 }) {
+            let initialOrder = destinations.sorted {
+                $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+            }
+            for (index, destination) in initialOrder.enumerated() {
+                destination.orderIndex = index
+            }
         }
     }
 

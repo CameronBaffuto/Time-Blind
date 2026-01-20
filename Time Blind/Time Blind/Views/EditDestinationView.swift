@@ -10,11 +10,13 @@ import SwiftData
 import MapKit
 
 struct EditDestinationView: View {
-    @Query(sort: \DestinationGroup.name) var groups: [DestinationGroup]
+    @Query(sort: \DestinationGroup.orderIndex) var groups: [DestinationGroup]
     @State private var selectedGroup: DestinationGroup?
 
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Bindable var destination: Destination
+    private let originalGroupID: PersistentIdentifier?
 
     @State private var name: String
     @State private var targetArrivalTime: Date?
@@ -28,6 +30,7 @@ struct EditDestinationView: View {
         self.destination = destination
         _name = State(initialValue: destination.name)
         _targetArrivalTime = State(initialValue: destination.targetArrivalTime)
+        originalGroupID = destination.group?.id
     }
 
     var body: some View {
@@ -134,6 +137,9 @@ struct EditDestinationView: View {
                 destination.address = addressVM.addressField
                 destination.targetArrivalTime = targetArrivalTime
                 destination.group = selectedGroup
+                if selectedGroup?.id != originalGroupID {
+                    destination.orderIndex = nextDestinationOrderIndex(for: selectedGroup)
+                }
 
                 if addressChanged {
                     let coord: CLLocationCoordinate2D
@@ -151,5 +157,21 @@ struct EditDestinationView: View {
             }
             isSaving = false
         }
+    }
+
+    private func nextDestinationOrderIndex(for group: DestinationGroup?) -> Int {
+        let descriptor: FetchDescriptor<Destination>
+        if let groupID = group?.id {
+            descriptor = FetchDescriptor(predicate: #Predicate { destination in
+                destination.group?.id == groupID
+            })
+        } else {
+            descriptor = FetchDescriptor(predicate: #Predicate { destination in
+                destination.group == nil
+            })
+        }
+        let existing = (try? modelContext.fetch(descriptor)) ?? []
+        let maxIndex = existing.map(\.orderIndex).max() ?? -1
+        return maxIndex + 1
     }
 }

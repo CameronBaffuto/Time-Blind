@@ -33,7 +33,6 @@ final class DestinationListViewModel: ObservableObject {
         isRefreshing = true
         defer { isRefreshing = false }
 
-        etaResults = [:]
         errorMessage = nil
 
         let locationService = DestinationETAService.shared
@@ -68,5 +67,32 @@ final class DestinationListViewModel: ObservableObject {
         }
     }
 
-}
+    func refreshETA(for destination: Destination, context: ModelContext) async {
+        errorMessage = nil
+        etaResults[destination.address] = nil
 
+        let locationService = DestinationETAService.shared
+
+        guard let lat = destination.latitude, let lng = destination.longitude else {
+            do {
+                let coord = try await GeocodingService.shared.geocode(address: destination.address)
+                destination.latitude = coord.latitude
+                destination.longitude = coord.longitude
+                try? context.save()
+                let result = try await locationService.calculateETA(to: coord)
+                etaResults[destination.address] = ETAResult(etaDate: result.etaDate, travelMinutes: result.travelMinutes, status: .ok)
+            } catch {
+                etaResults[destination.address] = ETAResult(etaDate: Date(), travelMinutes: 0, status: .geocodingFailed)
+            }
+            return
+        }
+
+        let destCoord = CLLocationCoordinate2D(latitude: lat, longitude: lng)
+        do {
+            let result = try await locationService.calculateETA(to: destCoord)
+            etaResults[destination.address] = ETAResult(etaDate: result.etaDate, travelMinutes: result.travelMinutes, status: .ok)
+        } catch {
+            etaResults[destination.address] = ETAResult(etaDate: Date(), travelMinutes: 0, status: .etaFailed)
+        }
+    }
+}

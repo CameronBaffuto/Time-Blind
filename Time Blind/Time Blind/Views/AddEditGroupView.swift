@@ -45,9 +45,17 @@ struct AddEditGroupView: View {
         if let group = group {
             group.name = trimmedName
         } else {
-            let newGroup = DestinationGroup(name: trimmedName)
+            let nextIndex = nextGroupOrderIndex()
+            let newGroup = DestinationGroup(name: trimmedName, orderIndex: nextIndex)
             modelContext.insert(newGroup)
         }
         dismiss()
+    }
+
+    private func nextGroupOrderIndex() -> Int {
+        let descriptor = FetchDescriptor<DestinationGroup>()
+        let existing = (try? modelContext.fetch(descriptor)) ?? []
+        let maxIndex = existing.map(\.orderIndex).max() ?? -1
+        return maxIndex + 1
     }
 }

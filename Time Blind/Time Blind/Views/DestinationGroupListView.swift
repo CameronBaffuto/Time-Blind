@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct DestinationGroupListView: View {
-    @Query(sort: \DestinationGroup.name) var groups: [DestinationGroup]
+    @Query(sort: \DestinationGroup.orderIndex) var groups: [DestinationGroup]
     @Environment(\.modelContext) private var modelContext
     @State private var showingAddGroup = false
     @State private var editingGroup: DestinationGroup?
@@ -43,9 +43,13 @@ struct DestinationGroupListView: View {
                         .tint(.blue)
                     }
                 }
+                .onMove(perform: moveGroups)
             }
             .navigationTitle("Time Blind")
             .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showingAddGroup = true
@@ -64,6 +68,7 @@ struct DestinationGroupListView: View {
         .onAppear {
             ensureUncategorizedGroupExists()
             assignExistingDestinationsToUncategorized()
+            ensureGroupOrderInitialized()
         }
     }
 
@@ -75,7 +80,8 @@ struct DestinationGroupListView: View {
 
     private func ensureUncategorizedGroupExists() {
         if !groups.contains(where: { $0.name == "Uncategorized" }) {
-            let uncategorized = DestinationGroup(name: "Uncategorized")
+            let maxIndex = groups.map(\.orderIndex).max() ?? -1
+            let uncategorized = DestinationGroup(name: "Uncategorized", orderIndex: maxIndex + 1)
             modelContext.insert(uncategorized)
         }
     }
@@ -86,6 +92,27 @@ struct DestinationGroupListView: View {
         allDestinations?.forEach { dest in
             if dest.group == nil {
                 dest.group = uncategorized
+            }
+        }
+    }
+
+    private func moveGroups(from source: IndexSet, to destination: Int) {
+        var reordered = groups
+        reordered.move(fromOffsets: source, toOffset: destination)
+        for (index, group) in reordered.enumerated() {
+            group.orderIndex = index
+        }
+    }
+
+    private func ensureGroupOrderInitialized() {
+        guard !groups.isEmpty else { return }
+        let indices = groups.map(\.orderIndex)
+        if Set(indices).count != indices.count || groups.allSatisfy({ $0.orderIndex == 0 }) {
+            let initialOrder = groups.sorted {
+                $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+            }
+            for (index, group) in initialOrder.enumerated() {
+                group.orderIndex = index
             }
         }
     }

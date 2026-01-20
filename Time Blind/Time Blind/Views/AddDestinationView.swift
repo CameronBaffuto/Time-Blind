@@ -10,7 +10,7 @@ import SwiftData
 import MapKit
 
 struct AddDestinationView: View {
-    @Query(sort: \DestinationGroup.name) var groups: [DestinationGroup]
+    @Query(sort: \DestinationGroup.orderIndex) var groups: [DestinationGroup]
     @State private var selectedGroup: DestinationGroup?
 
     @Environment(\.modelContext) private var modelContext
@@ -118,12 +118,14 @@ struct AddDestinationView: View {
                     coord = try await GeocodingService.shared.geocode(address: addressVM.addressField)
                 }
 
+                let nextIndex = nextDestinationOrderIndex(for: selectedGroup)
                 let newDest = Destination(
                     name: name,
                     address: addressVM.addressField,
                     latitude: coord.latitude,
                     longitude: coord.longitude,
                     targetArrivalTime: targetArrivalTime,
+                    orderIndex: nextIndex,
                     group: selectedGroup
                 )
                 modelContext.insert(newDest)
@@ -133,5 +135,21 @@ struct AddDestinationView: View {
             }
             isSaving = false
         }
+    }
+
+    private func nextDestinationOrderIndex(for group: DestinationGroup?) -> Int {
+        let descriptor: FetchDescriptor<Destination>
+        if let groupID = group?.id {
+            descriptor = FetchDescriptor(predicate: #Predicate { destination in
+                destination.group?.id == groupID
+            })
+        } else {
+            descriptor = FetchDescriptor(predicate: #Predicate { destination in
+                destination.group == nil
+            })
+        }
+        let existing = (try? modelContext.fetch(descriptor)) ?? []
+        let maxIndex = existing.map(\.orderIndex).max() ?? -1
+        return maxIndex + 1
     }
 }

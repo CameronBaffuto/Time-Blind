@@ -16,6 +16,7 @@ class Destination {
     var longitude: Double?
     var targetArrivalTime: Date?
     var lastGeocoded: Date?
+    var orderIndex: Int = 0
     @Relationship(inverse: \DestinationGroup.destinations) var group: DestinationGroup?
 
     init(
@@ -24,6 +25,7 @@ class Destination {
         latitude: Double? = nil,
         longitude: Double? = nil,
         targetArrivalTime: Date? = nil,
+        orderIndex: Int = 0,
         group: DestinationGroup? = nil,
     ) {
         self.name = name
@@ -31,7 +33,7 @@ class Destination {
         self.latitude = latitude
         self.longitude = longitude
         self.targetArrivalTime = targetArrivalTime
+        self.orderIndex = orderIndex
         self.group = group
     }
 }
-

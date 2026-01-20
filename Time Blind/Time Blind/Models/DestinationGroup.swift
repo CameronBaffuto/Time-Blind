@@ -11,9 +11,11 @@ import SwiftData
 @Model
 class DestinationGroup {
     var name: String
+    var orderIndex: Int = 0
     @Relationship(deleteRule: .cascade) var destinations: [Destination] = []
 
-    init(name: String) {
+    init(name: String, orderIndex: Int = 0) {
         self.name = name
+        self.orderIndex = orderIndex
     }
 }
