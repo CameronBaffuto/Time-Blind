@@ -5,100 +5,134 @@
 //  Created by Cameron Baffuto on 6/24/25.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct DestinationGroupListView: View {
-    @Query(sort: \DestinationGroup.orderIndex) var groups: [DestinationGroup]
+    @Query(sort: \DestinationGroup.orderIndex) private var groups: [DestinationGroup]
     @Environment(\.modelContext) private var modelContext
     @State private var showingAddGroup = false
     @State private var editingGroup: DestinationGroup?
 
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(groups) { group in
-                    NavigationLink(destination: DestinationListView(group: group)) {
-                        HStack {
-                            Text(group.name)
-                                .font(.headline)
-                            Spacer()
-                            Text("\(group.destinations.count)")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .accessibilityLabel("\(group.destinations.count) destinations")
-                        }
+        NavigationStack {
+            Group {
+                if groups.isEmpty {
+                    ContentUnavailableView {
+                        Label("No Lists", systemImage: "list.bullet.rectangle")
+                    } description: {
+                        Text("Create a list to organize the places you need to reach on time.")
+                    } actions: {
+                        Button("Create List", systemImage: "plus", action: showAddGroup)
+                            .buttonStyle(.borderedProminent)
                     }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            delete(group)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
+                } else {
+                    List {
+                        ForEach(groups) { group in
+                            NavigationLink(value: group) {
+                                LabeledContent {
+                                    Text(group.destinations.count, format: .number)
+                                        .foregroundStyle(.secondary)
+                                        .accessibilityLabel("\(group.destinations.count) destinations")
+                                } label: {
+                                    Label(group.name, systemImage: group.name == "Uncategorized" ? "tray" : "list.bullet")
+                                        .font(.headline)
+                                }
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                if group.name != "Uncategorized" {
+                                    Button("Delete", systemImage: "trash", role: .destructive) {
+                                        delete(group)
+                                    }
+                                    Button("Edit", systemImage: "square.and.pencil") {
+                                        editingGroup = group
+                                    }
+                                    .tint(.blue)
+                                }
+                            }
                         }
-                        Button {
-                            editingGroup = group
-                        } label: {
-                            Label("Edit", systemImage: "square.and.pencil")
-                        }
-                        .tint(.blue)
+                        .onMove(perform: moveGroups)
                     }
                 }
-                .onMove(perform: moveGroups)
             }
             .navigationTitle("Time Blind")
+            .navigationDestination(for: DestinationGroup.self) { group in
+                DestinationListView(group: group)
+            }
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Image(.logo)
                         .resizable()
                         .scaledToFit()
+                        .accessibilityHidden(true)
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingAddGroup = true
-                    } label: {
-                        Image(systemName: "plus")
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    if !groups.isEmpty {
+                        EditButton()
                     }
+                    Button("Add List", systemImage: "plus", action: showAddGroup)
                 }
             }
             .sheet(isPresented: $showingAddGroup) {
                 AddEditGroupView()
             }
-            .sheet(item: $editingGroup) { group in
-                AddEditGroupView(group: group)
-            }
+            .sheet(item: $editingGroup, content: AddEditGroupView.init)
         }
-        .onAppear {
-            ensureUncategorizedGroupExists()
-            assignExistingDestinationsToUncategorized()
-            ensureGroupOrderInitialized()
+        .task {
+            prepareInitialData()
         }
+    }
+
+    private func showAddGroup() {
+        showingAddGroup = true
     }
 
     private func delete(_ group: DestinationGroup) {
-        // Prevent deleting "Uncategorized"
-        if group.name == "Uncategorized" { return }
+        guard group.name != "Uncategorized" else { return }
+        let uncategorized = uncategorizedGroup()
+        let startingIndex = uncategorized.destinations.map(\.orderIndex).max() ?? -1
+
+        let destinationsToMove = group.destinations.sorted {
+            $0.orderIndex < $1.orderIndex
+        }
+        for (offset, destination) in destinationsToMove.enumerated() {
+            destination.group = uncategorized
+            destination.orderIndex = startingIndex + offset + 1
+        }
+
         modelContext.delete(group)
+        saveChanges()
     }
 
-    private func ensureUncategorizedGroupExists() {
-        if !groups.contains(where: { $0.name == "Uncategorized" }) {
-            let maxIndex = groups.map(\.orderIndex).max() ?? -1
-            let uncategorized = DestinationGroup(name: "Uncategorized", orderIndex: maxIndex + 1)
-            modelContext.insert(uncategorized)
-        }
-    }
-    
-    private func assignExistingDestinationsToUncategorized() {
-        guard let uncategorized = groups.first(where: { $0.name == "Uncategorized" }) else { return }
-        let allDestinations = try? modelContext.fetch(FetchDescriptor<Destination>())
-        allDestinations?.forEach { dest in
-            if dest.group == nil {
-                dest.group = uncategorized
+    private func prepareInitialData() {
+        let uncategorized = uncategorizedGroup()
+        let descriptor = FetchDescriptor<Destination>(
+            predicate: #Predicate { destination in
+                destination.group == nil
+            }
+        )
+
+        if let ungrouped = try? modelContext.fetch(descriptor) {
+            let startingIndex = uncategorized.destinations.map(\.orderIndex).max() ?? -1
+            for (offset, destination) in ungrouped.enumerated() {
+                destination.group = uncategorized
+                destination.orderIndex = startingIndex + offset + 1
             }
         }
+
+        ensureGroupOrderInitialized(including: uncategorized)
+        saveChanges()
+    }
+
+    private func uncategorizedGroup() -> DestinationGroup {
+        if let existing = groups.first(where: { $0.name == "Uncategorized" }) {
+            return existing
+        }
+
+        let nextIndex = (groups.map(\.orderIndex).max() ?? -1) + 1
+        let group = DestinationGroup(name: "Uncategorized", orderIndex: nextIndex)
+        modelContext.insert(group)
+        return group
     }
 
     private func moveGroups(from source: IndexSet, to destination: Int) {
@@ -107,18 +141,34 @@ struct DestinationGroupListView: View {
         for (index, group) in reordered.enumerated() {
             group.orderIndex = index
         }
+        saveChanges()
     }
 
-    private func ensureGroupOrderInitialized() {
-        guard !groups.isEmpty else { return }
-        let indices = groups.map(\.orderIndex)
-        if Set(indices).count != indices.count || groups.allSatisfy({ $0.orderIndex == 0 }) {
-            let initialOrder = groups.sorted {
-                $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
-            }
-            for (index, group) in initialOrder.enumerated() {
-                group.orderIndex = index
-            }
+    private func ensureGroupOrderInitialized(including uncategorized: DestinationGroup) {
+        var allGroups = groups
+        if !allGroups.contains(where: { $0 === uncategorized }) {
+            allGroups.append(uncategorized)
+        }
+
+        let indices = allGroups.map(\.orderIndex)
+        guard Set(indices).count != indices.count || allGroups.allSatisfy({ $0.orderIndex == 0 }) else {
+            return
+        }
+
+        for (index, group) in allGroups.sorted(by: groupNameSort).enumerated() {
+            group.orderIndex = index
+        }
+    }
+
+    private func groupNameSort(_ lhs: DestinationGroup, _ rhs: DestinationGroup) -> Bool {
+        lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
+    }
+
+    private func saveChanges() {
+        do {
+            try modelContext.save()
+        } catch {
+            assertionFailure("Failed to save destination groups: \(error.localizedDescription)")
         }
     }
 }

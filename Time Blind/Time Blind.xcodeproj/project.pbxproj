@@ -8,9 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		E5A1B20B2E0A000100000001 /* TimeBlindWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E5A1B2012E0A000100000001 /* TimeBlindWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		E5A1B2102E0A000100000001 /* TimeBlindWidgets/TimeBlindWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A1B20D2E0A000100000001 /* TimeBlindWidgets/TimeBlindWidgets.swift */; };
-		E5A1B2112E0A000100000001 /* TimeBlindShared/TimeBlindTripAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A1B20F2E0A000100000001 /* TimeBlindShared/TimeBlindTripAttributes.swift */; };
-		E5A1B2122E0A000100000001 /* TimeBlindWidgets/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E5A1B20E2E0A000100000001 /* TimeBlindWidgets/Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,16 +27,13 @@
 /* Begin PBXFileReference section */
 		E59285662E08EC300094E64E /* Time Blind.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Time Blind.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E5A1B2012E0A000100000001 /* TimeBlindWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TimeBlindWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		E5A1B20D2E0A000100000001 /* TimeBlindWidgets/TimeBlindWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeBlindWidgets/TimeBlindWidgets.swift; sourceTree = SOURCE_ROOT; };
-		E5A1B20E2E0A000100000001 /* TimeBlindWidgets/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = TimeBlindWidgets/Assets.xcassets; sourceTree = SOURCE_ROOT; };
-		E5A1B20F2E0A000100000001 /* TimeBlindShared/TimeBlindTripAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeBlindShared/TimeBlindTripAttributes.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		E5D921952F200AF7007A0582 /* Exceptions for "TimeBlindWidgets" folder in "TimeBlindWidgets" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Assets.xcassets,
+				Info.plist,
 			);
 			target = E5A1B2072E0A000100000001 /* TimeBlindWidgets */;
 		};
@@ -91,7 +85,6 @@
 				E5A1B2022E0A000100000001 /* TimeBlindWidgets */,
 				E5A1B20C2E0A000100000001 /* TimeBlindShared */,
 				E59285672E08EC300094E64E /* Products */,
-				E5D9216A2F1FE788007A0582 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -102,16 +95,6 @@
 				E5A1B2012E0A000100000001 /* TimeBlindWidgets.appex */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		E5D9216A2F1FE788007A0582 /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-				E5A1B20D2E0A000100000001 /* TimeBlindWidgets/TimeBlindWidgets.swift */,
-				E5A1B20F2E0A000100000001 /* TimeBlindShared/TimeBlindTripAttributes.swift */,
-				E5A1B20E2E0A000100000001 /* TimeBlindWidgets/Assets.xcassets */,
-			);
-			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -152,6 +135,10 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E5A1B2022E0A000100000001 /* TimeBlindWidgets */,
+				E5A1B20C2E0A000100000001 /* TimeBlindShared */,
 			);
 			name = TimeBlindWidgets;
 			packageProductDependencies = (
@@ -210,7 +197,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5A1B2122E0A000100000001 /* TimeBlindWidgets/Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,8 +214,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E5A1B2102E0A000100000001 /* TimeBlindWidgets/TimeBlindWidgets.swift in Sources */,
-				E5A1B2112E0A000100000001 /* TimeBlindShared/TimeBlindTripAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

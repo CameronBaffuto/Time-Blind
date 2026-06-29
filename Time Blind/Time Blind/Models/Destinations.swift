@@ -10,6 +10,8 @@ import SwiftData
 
 @Model
 class Destination {
+    #Index<Destination>([\.orderIndex])
+
     var name: String
     var address: String
     var latitude: Double?
@@ -17,7 +19,7 @@ class Destination {
     var targetArrivalTime: Date?
     var lastGeocoded: Date?
     var orderIndex: Int = 0
-    @Relationship(inverse: \DestinationGroup.destinations) var group: DestinationGroup?
+    var group: DestinationGroup?
 
     init(
         name: String,

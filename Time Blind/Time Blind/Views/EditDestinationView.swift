@@ -5,173 +5,234 @@
 //  Created by Cameron Baffuto on 6/22/25.
 //
 
-import SwiftUI
-import SwiftData
 import MapKit
+import SwiftData
+import SwiftUI
 
 struct EditDestinationView: View {
-    @Query(sort: \DestinationGroup.orderIndex) var groups: [DestinationGroup]
-    @State private var selectedGroup: DestinationGroup?
-
+    @Query(sort: \DestinationGroup.orderIndex) private var groups: [DestinationGroup]
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Bindable var destination: Destination
+
+    let destination: Destination
     private let originalGroupID: PersistentIdentifier?
 
+    @State private var selectedGroup: DestinationGroup?
     @State private var name: String
-    @State private var targetArrivalTime: Date?
+    @State private var targetArrivalTime: Date
+    @State private var hasTargetArrivalTime: Bool
     @State private var isSaving = false
     @State private var errorMessage: String?
-    @StateObject private var addressVM = AddressAutocompleteViewModel()
-    @State private var addressChanged = false
+    @StateObject private var addressViewModel: AddressAutocompleteViewModel
     @State private var showAddressSearch = false
 
     init(destination: Destination) {
         self.destination = destination
+        originalGroupID = destination.group?.persistentModelID
+        _selectedGroup = State(initialValue: destination.group)
         _name = State(initialValue: destination.name)
-        _targetArrivalTime = State(initialValue: destination.targetArrivalTime)
-        originalGroupID = destination.group?.id
+        _targetArrivalTime = State(initialValue: destination.targetArrivalTime ?? .now)
+        _hasTargetArrivalTime = State(initialValue: destination.targetArrivalTime != nil)
+
+        let addressViewModel = AddressAutocompleteViewModel()
+        addressViewModel.addressField = destination.address
+        if let latitude = destination.latitude,
+           let longitude = destination.longitude {
+            let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            addressViewModel.selectedCoordinate = coordinate
+            addressViewModel.mapRegion = MKCoordinateRegion(
+                center: coordinate,
+                latitudinalMeters: 1_000,
+                longitudinalMeters: 1_000
+            )
+        }
+        _addressViewModel = StateObject(wrappedValue: addressViewModel)
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
-                Section(header: Text("Details")) {
-                    TextField("Name", text: $name)
+                Section("Details") {
+                    TextField("Place name", text: $name)
+                        .textInputAutocapitalization(.words)
 
-                    Button {
-                        showAddressSearch = true
-                    } label: {
-                        HStack {
-                            Text(addressVM.addressField.isEmpty ? "Tap to search address" : addressVM.addressField)
-                                .foregroundColor(addressVM.addressField.isEmpty ? .gray : .primary)
-                            Spacer()
-                            Image(systemName: "magnifyingglass")
+                    Button(action: showAddressPicker) {
+                        LabeledContent {
+                            Image(systemName: "chevron.right")
+                                .foregroundStyle(.tertiary)
+                        } label: {
+                            Label {
+                                Text(addressViewModel.addressField.isEmpty ? "Search for an address" : addressViewModel.addressField)
+                                    .foregroundStyle(addressViewModel.addressField.isEmpty ? .secondary : .primary)
+                                    .multilineTextAlignment(.leading)
+                            } icon: {
+                                Image(systemName: "mappin.and.ellipse")
+                            }
                         }
                     }
 
-                    if let region = addressVM.mapRegion {
+                    if let region = addressViewModel.mapRegion {
                         Map(position: .constant(.region(region))) {
-                            if let coordinate = addressVM.selectedCoordinate ?? addressVM.mapRegion?.center {
+                            if let coordinate = addressViewModel.selectedCoordinate ?? addressViewModel.mapRegion?.center {
                                 Marker("Destination", coordinate: coordinate)
                             }
                         }
-                        .frame(height: 180)
-                        .cornerRadius(10)
-                        .padding(.vertical, 4)
+                        .frame(minHeight: 180)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .accessibilityLabel("Map showing the selected destination")
                     }
 
-                    Picker("Group", selection: $selectedGroup) {
+                    Picker("List", selection: $selectedGroup) {
                         ForEach(groups) { group in
                             Text(group.name).tag(group as DestinationGroup?)
                         }
                     }
-
-                    DatePicker(
-                        "Target Arrival Time (optional)",
-                        selection: Binding(
-                            get: { targetArrivalTime ?? Date() },
-                            set: { targetArrivalTime = $0 }
-                        ),
-                        displayedComponents: [.hourAndMinute, .date]
-                    )
-                    .labelsHidden()
-                    .opacity(targetArrivalTime == nil ? 0.5 : 1)
-                    Toggle("Set Target Arrival Time", isOn: Binding(
-                        get: { targetArrivalTime != nil },
-                        set: { newValue in targetArrivalTime = newValue ? Date() : nil }
-                    ))
                 }
 
-                if let errorMessage = errorMessage {
+                Section("Arrival") {
+                    Toggle("Set an arrival time", isOn: $hasTargetArrivalTime)
+                    if hasTargetArrivalTime {
+                        DatePicker(
+                            "Arrive by",
+                            selection: $targetArrivalTime,
+                            displayedComponents: [.date, .hourAndMinute]
+                        )
+                    }
+                }
+
+                if let errorMessage {
                     Section {
-                        Text(errorMessage)
-                            .foregroundColor(.red)
+                        Label(errorMessage, systemImage: "exclamationmark.triangle")
+                            .foregroundStyle(.red)
                     }
                 }
             }
-            .navigationTitle("Edit Destination")
+            .navigationTitle("Edit Place")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", action: dismiss.callAsFunction)
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     if isSaving {
                         ProgressView()
+                            .accessibilityLabel("Saving place")
                     } else {
-                        Button("Save") { save() }
-                            .disabled(name.isEmpty || addressVM.addressField.isEmpty)
+                        Button("Save", action: save)
+                            .disabled(!canSave)
                     }
                 }
             }
             .sheet(isPresented: $showAddressSearch) {
-                AddressSearchView(viewModel: addressVM)
+                AddressSearchView(viewModel: addressViewModel)
             }
-            .onAppear {
-                addressVM.addressField = destination.address
-                if let lat = destination.latitude, let lng = destination.longitude {
-                    let coord = CLLocationCoordinate2D(latitude: lat, longitude: lng)
-                    addressVM.selectedCoordinate = coord
-                    addressVM.mapRegion = MKCoordinateRegion(center: coord, latitudinalMeters: 1000, longitudinalMeters: 1000)
-                } else {
-                    addressVM.selectedCoordinate = nil
-                    addressVM.mapRegion = nil
-                }
-                addressVM.showSuggestions = false
+            .task {
                 if selectedGroup == nil {
-                    selectedGroup = destination.group ?? groups.first(where: { $0.name == "Uncategorized" }) ?? groups.first
+                    selectedGroup = groups.first(where: { $0.name == "Uncategorized" }) ?? groups.first
                 }
-            }
-            .onChange(of: addressVM.addressField) {
-                addressChanged = (addressVM.addressField != destination.address)
             }
         }
+    }
+
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !addressViewModel.addressField.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && selectedGroup != nil
+    }
+
+    private var addressChanged: Bool {
+        addressViewModel.addressField != destination.address
+    }
+
+    private func showAddressPicker() {
+        showAddressSearch = true
     }
 
     private func save() {
         Task {
-            isSaving = true
-            errorMessage = nil
-            do {
-                destination.name = name
-                destination.address = addressVM.addressField
-                destination.targetArrivalTime = targetArrivalTime
-                destination.group = selectedGroup
-                if selectedGroup?.id != originalGroupID {
-                    destination.orderIndex = nextDestinationOrderIndex(for: selectedGroup)
-                }
-
-                if addressChanged {
-                    let coord: CLLocationCoordinate2D
-                    if let c = addressVM.selectedCoordinate {
-                        coord = c
-                    } else {
-                        coord = try await GeocodingService.shared.geocode(address: addressVM.addressField)
-                    }
-                    destination.latitude = coord.latitude
-                    destination.longitude = coord.longitude
-                }
-                dismiss()
-            } catch {
-                errorMessage = error.localizedDescription
-            }
-            isSaving = false
+            await saveDestination()
         }
     }
 
-    private func nextDestinationOrderIndex(for group: DestinationGroup?) -> Int {
-        let descriptor: FetchDescriptor<Destination>
-        if let groupID = group?.id {
-            descriptor = FetchDescriptor(predicate: #Predicate { destination in
-                destination.group?.id == groupID
-            })
-        } else {
-            descriptor = FetchDescriptor(predicate: #Predicate { destination in
-                destination.group == nil
-            })
+    private func saveDestination() async {
+        isSaving = true
+        defer { isSaving = false }
+        errorMessage = nil
+
+        do {
+            var updatedCoordinate: CLLocationCoordinate2D?
+            if addressChanged {
+                if let selectedCoordinate = addressViewModel.selectedCoordinate {
+                    updatedCoordinate = selectedCoordinate
+                } else {
+                    updatedCoordinate = try await GeocodingService.shared.geocode(address: addressViewModel.addressField)
+                }
+            }
+
+            let updatedOrderIndex: Int
+            if selectedGroup?.persistentModelID != originalGroupID {
+                updatedOrderIndex = try DestinationOrdering.nextDestinationIndex(
+                    in: selectedGroup,
+                    context: modelContext
+                )
+            } else {
+                updatedOrderIndex = destination.orderIndex
+            }
+
+            let original = OriginalDestinationValues(destination: destination)
+            destination.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            destination.address = addressViewModel.addressField
+            destination.targetArrivalTime = hasTargetArrivalTime ? targetArrivalTime : nil
+            destination.group = selectedGroup
+            destination.orderIndex = updatedOrderIndex
+            if let updatedCoordinate {
+                destination.latitude = updatedCoordinate.latitude
+                destination.longitude = updatedCoordinate.longitude
+                destination.lastGeocoded = .now
+            }
+
+            do {
+                try modelContext.save()
+            } catch {
+                original.restore(destination)
+                throw error
+            }
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
         }
-        let existing = (try? modelContext.fetch(descriptor)) ?? []
-        let maxIndex = existing.map(\.orderIndex).max() ?? -1
-        return maxIndex + 1
+    }
+}
+
+private struct OriginalDestinationValues {
+    let name: String
+    let address: String
+    let latitude: Double?
+    let longitude: Double?
+    let targetArrivalTime: Date?
+    let lastGeocoded: Date?
+    let orderIndex: Int
+    let group: DestinationGroup?
+
+    init(destination: Destination) {
+        name = destination.name
+        address = destination.address
+        latitude = destination.latitude
+        longitude = destination.longitude
+        targetArrivalTime = destination.targetArrivalTime
+        lastGeocoded = destination.lastGeocoded
+        orderIndex = destination.orderIndex
+        group = destination.group
+    }
+
+    func restore(_ destination: Destination) {
+        destination.name = name
+        destination.address = address
+        destination.latitude = latitude
+        destination.longitude = longitude
+        destination.targetArrivalTime = targetArrivalTime
+        destination.lastGeocoded = lastGeocoded
+        destination.orderIndex = orderIndex
+        destination.group = group
     }
 }

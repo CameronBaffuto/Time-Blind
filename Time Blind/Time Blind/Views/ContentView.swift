@@ -10,10 +10,12 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @State private var destinationListViewModel = DestinationListViewModel()
 
     var body: some View {
         DestinationGroupListView()
-            .onAppear {
+            .environment(destinationListViewModel)
+            .task {
                 LiveActivityManager.shared.startMonitoring(modelContainer: modelContext.container)
             }
     }
@@ -21,5 +23,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Destination.self) 
+        .modelContainer(for: [Destination.self, DestinationGroup.self], inMemory: true)
 }

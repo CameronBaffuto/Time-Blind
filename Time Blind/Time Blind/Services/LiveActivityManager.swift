@@ -8,6 +8,7 @@
 import ActivityKit
 import CoreLocation
 import Foundation
+import OSLog
 import SwiftData
 
 @MainActor
@@ -19,6 +20,10 @@ final class LiveActivityManager {
     private var activeDestinationID: PersistentIdentifier?
     private var activeTargetTime: Date?
     private var modelContainer: ModelContainer?
+    private let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "TimeBlind",
+        category: "LiveActivity"
+    )
 
     private let windowHours: Double = 6
     private let idleInterval: TimeInterval = 900
@@ -43,13 +48,13 @@ final class LiveActivityManager {
         while !Task.isCancelled {
             await sync()
             let interval = updateInterval()
-            try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+            try? await Task.sleep(for: .seconds(interval))
         }
     }
 
     private func updateInterval() -> TimeInterval {
         guard let targetTime = activeTargetTime else { return idleInterval }
-        let remaining = targetTime.timeIntervalSince(Date())
+        let remaining = targetTime.timeIntervalSince(.now)
         if remaining <= 300 { return 30 }
         if remaining <= 1800 { return 120 }
         return 600
@@ -61,12 +66,19 @@ final class LiveActivityManager {
         guard let modelContainer else { return }
         let modelContext = ModelContext(modelContainer)
 
-        let now = Date()
-        let descriptor = FetchDescriptor<Destination>(predicate: #Predicate { destination in
+        let now = Date.now
+        var descriptor = FetchDescriptor<Destination>(predicate: #Predicate { destination in
             destination.targetArrivalTime != nil
         })
+        descriptor.relationshipKeyPathsForPrefetching = [\Destination.group]
 
-        let all = (try? modelContext.fetch(descriptor)) ?? []
+        let all: [Destination]
+        do {
+            all = try modelContext.fetch(descriptor)
+        } catch {
+            logger.error("Failed to fetch upcoming destinations: \(error.localizedDescription, privacy: .public)")
+            return
+        }
         var didMutate = false
         var upcoming: [(Destination, Date)] = []
 
@@ -83,7 +95,11 @@ final class LiveActivityManager {
         }
 
         if didMutate {
-            try? modelContext.save()
+            do {
+                try modelContext.save()
+            } catch {
+                logger.error("Failed to clear expired arrival times: \(error.localizedDescription, privacy: .public)")
+            }
         }
 
         guard let next = upcoming.sorted(by: { $0.1 < $1.1 }).first else {
@@ -148,7 +164,11 @@ final class LiveActivityManager {
             let coord = try await GeocodingService.shared.geocode(address: destination.address)
             destination.latitude = coord.latitude
             destination.longitude = coord.longitude
-            try? context.save()
+            do {
+                try context.save()
+            } catch {
+                logger.error("Failed to save geocoded destination: \(error.localizedDescription, privacy: .public)")
+            }
             let result = try await DestinationETAService.shared.calculateETA(to: coord)
             return result.travelMinutes
         } catch {

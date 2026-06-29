@@ -14,6 +14,6 @@ struct TimeBlindApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: Destination.self)
+        .modelContainer(for: [Destination.self, DestinationGroup.self])
     }
 }
